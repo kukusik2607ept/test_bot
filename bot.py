@@ -13,15 +13,17 @@ PROXY = {'proxy_url': settings.PROXY_URL,
          'urllib3_proxy_kwargs': {'username': settings.PROXY_USERNAME, 'password': settings.PROXY_PASSWORD}}
 
 
-def create_emoji():
-    smile = choice(settings.USER_EMOJI)
-    smile = emojize(smile, use_aliases=True)
-    return smile
+def get_emoji(user_data):
+    if 'emoji' not in user_data:
+        smile = choice(settings.USER_EMOJI)
+        return emojize(smile, use_aliases=True)
+    return user_data['emoji']
 
 
 def greet_user(update, context):
     print('Вызван /start')
-    update.message.reply_text(f"Привет, username, ты нажал start {create_emoji()}")
+    context.user_data['emoji'] = get_emoji(context.user_data)
+    update.message.reply_text(f"Привет, username, ты нажал start {context.user_data['emoji']}")
 
 
 def send_burger_picture(update, context):
@@ -33,8 +35,9 @@ def send_burger_picture(update, context):
 
 def talk_to_me(update, context):
     text = update.message.text
+    context.user_data['emoji'] = get_emoji(context.user_data)
     print(text)
-    update.message.reply_text(f"Можем повторить {create_emoji()}: " + text)
+    update.message.reply_text(f"Можем повторить {context.user_data['emoji']}: " + text)
 
 
 def guess_number(update, context):
