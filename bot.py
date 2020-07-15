@@ -1,7 +1,11 @@
+from emoji import emojize
+from glob import glob
 import logging
-import settings
+from random import choice, randint
+
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
+import settings
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
 
@@ -9,14 +13,51 @@ PROXY = {'proxy_url': settings.PROXY_URL,
          'urllib3_proxy_kwargs': {'username': settings.PROXY_USERNAME, 'password': settings.PROXY_PASSWORD}}
 
 
+def create_emoji():
+    smile = choice(settings.USER_EMOJI)
+    smile = emojize(smile, use_aliases=True)
+    return smile
+
+
 def greet_user(update, context):
     print('Вызван /start')
-    update.message.reply_text("Привет, username, ты нажал start")
+    update.message.reply_text(f"Привет, username, ты нажал start {create_emoji()}")
+
+
+def send_burger_picture(update, context):
+    burger_list = glob('images/*burger*.jp*g')
+    burger_pic = choice(burger_list)
+    chat_id = update.effective_chat.id
+    context.bot.send_photo(chat_id=chat_id, photo=open(burger_pic, 'rb'))
 
 
 def talk_to_me(update, context):
     text = update.message.text
     print(text)
+    update.message.reply_text(f"Можем повторить {create_emoji()}: " + text)
+
+
+def guess_number(update, context):
+    if context.args:
+        try:
+            number = int(context.args[0])
+            message = play_random_numbers(number)
+        except (TypeError, ValueError):
+            message = "Введите целое число"
+    else:
+        message = "Введите число"
+    update.message.reply_text(message)
+
+
+def play_random_numbers(user_number):
+    bot_number = randint(user_number - 10, user_number + 10)
+    if user_number > bot_number:
+        message = f"Ваше число {user_number}, мое {bot_number}, вы выиграли!"
+    elif user_number == bot_number:
+        message = f"Ваше число {user_number}, мое {bot_number}, ничья"
+    else:
+        message = f"Ваше число {user_number}, мое {bot_number}, вы проиграли("
+    return message
 
 
 def main():
@@ -26,10 +67,12 @@ def main():
     # Диспетчер отработки сообщений от пользователя
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
+    dp.add_handler(CommandHandler("burger", send_burger_picture))
+    dp.add_handler(CommandHandler("guess", guess_number))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     # Сообщение в файл bot.log
-    logging.info("Бот стартовал")
+    logging.info(u"Start Bot")
 
     # Командуем боту начать ходить в ТГ за сообщениями
     mybot.start_polling()
