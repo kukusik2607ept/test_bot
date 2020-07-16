@@ -1,6 +1,8 @@
 from random import choice, randint
 
+from clarifai.rest import ClarifaiApp
 from emoji import emojize
+from pprint import PrettyPrinter
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 
 import settings
@@ -26,3 +28,16 @@ def play_random_numbers(user_number):
     else:
         message = f"Ваше число {user_number}, мое {bot_number}, вы проиграли("
     return message
+
+
+def is_burger(file_name):
+    app = ClarifaiApp(api_key=settings.CLARIFAI_API_KEY)
+    model = app.public_models.general_model
+    response = model.predict_by_filename(file_name, max_concepts=20)
+    if response['status']['code'] == 10000:
+        print(response)
+        for concept in response['outputs'][0]['data']['concepts']:
+            if concept['name'] == 'burger':
+                return True
+    return False
+
