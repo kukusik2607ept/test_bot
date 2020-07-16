@@ -16,7 +16,7 @@ def get_emoji(user_data):
 
 
 def main_keyboard():
-    return ReplyKeyboardMarkup([['Прислать бургер', KeyboardButton('Прислать мои координаты', request_location=True)]])
+    return ReplyKeyboardMarkup([['Прислать бургер', KeyboardButton('Прислать мои координаты', request_location=True)], ["Заполнить анкету"]])
 
 
 def play_random_numbers(user_number):
