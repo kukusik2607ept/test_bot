@@ -1,22 +1,16 @@
 from random import choice, randint
+from string import ascii_letters
 
 from clarifai.rest import ClarifaiApp
-from emoji import emojize
 from pprint import PrettyPrinter
-from telegram import ReplyKeyboardMarkup, KeyboardButton
+from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 
 import settings
 
 
-def get_emoji(user_data):
-    if 'emoji' not in user_data:
-        smile = choice(settings.USER_EMOJI)
-        return emojize(smile, use_aliases=True)
-    return user_data['emoji']
-
-
 def main_keyboard():
-    return ReplyKeyboardMarkup([['Прислать бургер', KeyboardButton('Прислать мои координаты', request_location=True)], ["Заполнить анкету"]])
+    return ReplyKeyboardMarkup(
+        [['Прислать бургер', KeyboardButton('Прислать мои координаты', request_location=True)], ["Заполнить анкету"]])
 
 
 def play_random_numbers(user_number):
@@ -41,3 +35,21 @@ def is_burger(file_name):
                 return True
     return False
 
+
+def burger_rating_inline_keyboard(image_name):
+    callback_text = f"Rating|{image_name}|"
+    keyboard = [
+        [
+            InlineKeyboardButton('Like', callback_data=callback_text + '1'),
+            InlineKeyboardButton('Dislike', callback_data=callback_text + '-1')
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def photo_rename(length):
+    letters = ascii_letters
+    burger_name = ''
+    for i in range(length):
+        burger_name += choice(letters)
+    return burger_name
